@@ -1,0 +1,4 @@
+env/
+MNIST/
+*.sw*
+.vscode/
