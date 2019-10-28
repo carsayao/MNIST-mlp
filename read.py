@@ -37,9 +37,12 @@ def read_to_dat():
                 labels_path = test_labels_raw)
         return x, y
     def convert_targets_train(array):
-        target_array = np.zeros((SAMPLES, NEURONS), dtype=int)
+        # target_array = np.zeros((SAMPLES, NEURONS), dtype=float)
+        target_array = np.empty((SAMPLES, NEURONS), dtype='float32')
+        target_array.fill(0.1)
         for t in range(SAMPLES):
-            target_array[t][int(array[t])] = 1
+            target_array[t][int(array[t])] = .9
+        print(target_array[0])
         return target_array
     def convert_targets_test(array):
         target_array = np.zeros((SAMPLES_T, NEURONS), dtype=int)
@@ -55,7 +58,7 @@ def read_to_dat():
     fp0 = np.memmap(train_images_dat, dtype='float32',
                     mode='w+', shape=(SAMPLES,INPUTS))
     fp0[:] = train_images[:]
-    fp1 = np.memmap(train_labels_dat, dtype='int8',
+    fp1 = np.memmap(train_labels_dat, dtype='float32',
                     mode='w+', shape=(SAMPLES,NEURONS))
     fp1[:] = train_labels[:]
 
@@ -65,7 +68,7 @@ def read_to_dat():
     fp2 = np.memmap(test_images_dat, dtype='float32',
                     mode='w+', shape=(SAMPLES_T,INPUTS))
     fp2[:] = test_images[:]
-    fp3 = np.memmap(test_labels_dat, dtype='int8',
+    fp3 = np.memmap(test_labels_dat, dtype='float32',
                     mode='w+', shape=(SAMPLES_T,NEURONS))
     fp3[:] = test_labels[:]
 
