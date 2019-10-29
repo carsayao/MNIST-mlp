@@ -58,7 +58,6 @@ def forward(x, t, n_h, n_o, w_h, w_o):
     h_deltas = n_h * (1-n_h) * np.dot(w_o,np.transpose(o_deltas))
     print('dim h_deltas: %s x %s' % (h_deltas.shape[0], h_deltas.shape[1]))
 
-
 def main():
     inputs, targets = load()
     oneurons, hneurons, oweights, hweights = init_neurons_weights()
