@@ -37,11 +37,14 @@ def read_to_dat():
                 labels_path = test_labels_raw)
         return x, y
     def convert_targets_train(train_array):
-        # target_array = np.zeros((SAMPLES, NEURONS), dtype=float)
-        target_array = np.empty((SAMPLES, NEURONS), dtype='float32')
-        target_array.fill(0.1)
+        target_array = np.zeros((SAMPLES, NEURONS), dtype=float)
+
+        # target_array = np.empty((SAMPLES, NEURONS), dtype='float32')
+        # target_array.fill(0.1)
+
         for t in range(SAMPLES):
-            target_array[t][int(train_array[t])] = 0.9
+            # target_array[t][int(train_array[t])] = 0.9
+            target_array[t][int(train_array[t])] = 1
         print(target_array[59999])
         return target_array
     def convert_targets_test(test_array):
@@ -69,6 +72,7 @@ def read_to_dat():
 
     test_images, test_labels = read_test_data()
     test_labels = convert_targets_test(test_labels)
+    print(test_labels[9999])
     test_images = test_images / 255
     fp2 = np.memmap(test_images_dat, dtype='float64',
                     mode='w+', shape=(SAMPLES_T,INPUTS))

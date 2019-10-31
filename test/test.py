@@ -23,7 +23,9 @@ ALPHA = .5
 # Array of epochs to store correct %
 CORRECT = []
 
-arg = sys.argv[1]
+# arg = sys.argv[1]
+arg = "tuple"
+
 path = os.path.dirname(os.path.realpath(__file__))
 test_images_dat = path + '/../MNIST/test_images.dat'
 
@@ -74,10 +76,14 @@ if arg == 'array':
     # print('y:%sy%s' % (y.shape[0],y.shape[1]))
     # print('x:%sx%s' % (x.shape[0],x.shape[1]))
     
-    # h_deltas = np.ones((SAMPLES,NEURONS_H+1))
-    # h_deltas = np.array([[1,2,3,4],[5,6,7,8]])
-    # print('\nh_deltas:%sx%s' % (h_deltas.shape[0],h_deltas.shape[1]))
-    # print(h_deltas)
+    h_deltas = np.ones((SAMPLES,NEURONS_H+1))
+    h_deltas = np.array([[1,2,3,4],
+                         [5,6,7,8]])
+    print('\nh_deltas:%sx%s' % (h_deltas.shape[0],h_deltas.shape[1]))
+    print(h_deltas)
+    h_deltas = np.c_[h_deltas,np.zeros(2)]
+    print('\nh_deltas dim after np.c_[]:%sx%s' % (h_deltas.shape[0],h_deltas.shape[1]))
+    print(h_deltas)
     # chop = h_deltas[:-1:]
     # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
     # print(chop, '\n')
@@ -90,12 +96,40 @@ if arg == 'array':
     # chop = h_deltas[:,1:1]
     # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
     # print(chop, '\n')
-    # chop = h_deltas[:,:1]
-    # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
-    # print(chop, '\n')
-    # chop = h_deltas[:,:-1]
-    # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
-    # print(chop, '\n')
+    chop = h_deltas[:,1:]
+    print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
+    print(chop, '\n')
+    chop1 = h_deltas[:,:-1]
+    print('chop1:%sx%s' % (chop1.shape[0],chop1.shape[1]))
+    print(chop1, '\n')
 
 if arg == 'format':
     print('hello ' + f'{int(ALPHA*1000):03d}')
+
+if arg == "shuffle":
+    matrix = np.array([[1,2,3,4],
+                       [5,6,7,8],
+                       [9,10,11,12]])
+    print(matrix)
+    np.random.shuffle(matrix)
+    print(matrix)
+
+if arg == "tuple":
+    s = 20
+    t = 20
+    x = 7
+    n = 2
+    inputs = np.ones((s,x))
+    print("inputs\n",inputs)
+    targets = np.zeros((s,n))
+    print("targets\n",targets)
+    tup = np.array([np.asarray.inputs,targets])
+    print("tup\n",tup)
+
+if arg=="dumb":
+    matrix = np.ones((3,5))
+    a = np.ones(np.shape(matrix))
+    b = np.ones((np.shape(matrix)))
+    print("matrix\n",matrix)
+    print("a\n",a)
+    print("b\b",b)
