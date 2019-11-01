@@ -2,3 +2,4 @@ env/
 MNIST/
 *.sw*
 .vscode/
+out*

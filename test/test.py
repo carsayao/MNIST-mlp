@@ -23,8 +23,8 @@ ALPHA = .5
 # Array of epochs to store correct %
 CORRECT = []
 
-# arg = sys.argv[1]
-arg = "tuple"
+arg = sys.argv[1]
+# arg = "tuple"
 
 path = os.path.dirname(os.path.realpath(__file__))
 test_images_dat = path + '/../MNIST/test_images.dat'
@@ -96,9 +96,12 @@ if arg == 'array':
     # chop = h_deltas[:,1:1]
     # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
     # print(chop, '\n')
+
+    # Chop first column
     chop = h_deltas[:,1:]
     print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
     print(chop, '\n')
+    # Chop last column
     chop1 = h_deltas[:,:-1]
     print('chop1:%sx%s' % (chop1.shape[0],chop1.shape[1]))
     print(chop1, '\n')
@@ -107,24 +110,54 @@ if arg == 'format':
     print('hello ' + f'{int(ALPHA*1000):03d}')
 
 if arg == "shuffle":
-    matrix = np.array([[1,2,3,4],
-                       [5,6,7,8],
-                       [9,10,11,12]])
-    print(matrix)
-    np.random.shuffle(matrix)
-    print(matrix)
+    samples = np.array([[.01,.05,.09,.04],
+                        [.02,.06,.07,.08],
+                        [.03,.01,.11,.12],
+                        [.04,1,1,1],
+                        [.05,1,2,3]])
+    targets = np.array([[1, 5],
+                        [2, 6],
+                        [3, 1],
+                        [4,1],
+                        [5,1]])
+    print("samples")
+    print(samples)
+    print("targets")
+    print(targets)
+    print(np.shape(samples)[0])
+    # ran = range(np.shape(samples)[0])
+    # print(ran)
+    # np.random.shuffle(ran)
+    print(samples)
+    def shuffle_sets(samples, targets):
+        rng_state = np.random.get_state()
+        # print("rng_state",rng_state)
+        np.random.shuffle(samples)
+        np.random.set_state(rng_state)
+        np.random.shuffle(targets)
+    shuffle_sets(samples, targets)
+    print(" ----- SHUFFLE ----- ")
+    print("samples")
+    print(samples)
+    print("targets")
+    print(targets)
 
 if arg == "tuple":
-    s = 20
-    t = 20
-    x = 7
+    s = 4
+    t = 4
+    x = 3
     n = 2
     inputs = np.ones((s,x))
-    print("inputs\n",inputs)
+    print("inputssss\n",inputs)
     targets = np.zeros((s,n))
     print("targets\n",targets)
-    tup = np.array([np.asarray.inputs,targets])
-    print("tup\n",tup)
+    print(np.asarray(inputs))
+    shuffle = range(s)
+    print(shuffle)
+    # np.random.shuffle(shuffle)
+    print(shuffle)
+    # tup = np.array((np.asarray(inputs),np.asarray(targets)))
+    # print("tup\n",tup)
 
 if arg=="dumb":
     matrix = np.ones((3,5))
@@ -133,3 +166,31 @@ if arg=="dumb":
     print("matrix\n",matrix)
     print("a\n",a)
     print("b\b",b)
+
+if arg=="pred":
+    s = 4
+    n_o = np.array([[0,0,1,0],
+                    [0,0,0,1],
+                    [1,0,0,0],
+                    [0,1,0,0]])
+    t   = np.array([[0,0,1,0],
+                    [0,0,1,0],
+                    [0,1,0,0],
+                    [1,0,0,0]], dtype="float32")
+    print("n_o")
+    print(n_o)
+    print("t")
+    print(t)
+    print("n_o*t")
+    target_k = n_o*t
+    print(n_o*t)
+    for N in range(s):
+        # target_k[N] = np.where(target_k[N]>=np.amax(target_k[N]),0.9,0.1)
+        target_k[N] = np.where(target_k[N]==1,.9,.1)
+    print("target_k")
+    print(target_k)
+    matrix = np.array([[1,-2,3,4],
+                       [5,-6,7,8],
+                       [9,-10,11,12]])
+    print(np.transpose(matrix))
+    # print(-matrix)

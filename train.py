@@ -1,8 +1,13 @@
 from mlxtend.data import loadlocal_mnist
 import numpy as np
+from scipy.special import expit
 import os
 import sys
 import warnings
+warnings.filterwarnings("error")
+# DEBUG = True
+DEBUG = False
+# np.set_printoptions(threshold=sys.maxsize)
 
 # t:	    ( SAMPLES , 10 )
 # x:	    ( SAMPLES , INPUTS+1 )
@@ -18,8 +23,8 @@ import warnings
 # w_h:	( INPUTS+1 , NEURONS_H )
 
 class mlp:
-    # inputs, samples, hidden units, learning rate, momentum, epochs
-    def __init__(self, x, N, n_h, lr, alpha, epochs):
+    # inputs, samples, hidden units, learning rate, momentum, weight decay, epochs
+    def __init__(self, x, N, n_h, lr, alpha, decay, epochs):
         # Number of inputs
         self.INPUTS = x
         # Number of neurons
@@ -38,6 +43,7 @@ class mlp:
         self.LR = lr
         # Momentum term
         self.ALPHA = alpha
+        self.LAMBDA = decay
         # Array of epochs to store correct %
         self.CORRECT = []
         # Absolute path
@@ -89,11 +95,18 @@ class mlp:
     
     # Sigmoid function
     def activate(self, n):
-        try:
-            n = 1 / (1 + np.exp(-n))
-        except RuntimeWarning as r:
-        # except:
-            print('\nwarning! n==%s, r: %s' % (n,r))
+        # try:
+        #     return 1 / (1 + np.exp(-n))
+        # except RuntimeWarning:
+        #     print('\nwarning! n==%s' % n)
+        # return 1/(1+expit(-1*n))
+        return expit(n)
+
+    def shuffle_sets(self, samples, targets):
+        rng_state = np.random.get_state()
+        np.random.shuffle(samples)
+        np.random.set_state(rng_state)
+        np.random.shuffle(targets)
 
     # Params: x==inputs, t==targets, n==neurons, w==weights, u==update,
     #         h==hidden, o==output
@@ -107,116 +120,148 @@ class mlp:
         self.CORRECT.append(self.NEURONS_H)
         self.CORRECT.append(self.ALPHA)
 
-        # print("\nforward()")
-        # print("w_o[0]\n",self.w_o[0])
-        # print("w_h[0]\n",self.w_h[0])
-
-
         for e in range(self.EPOCHS):
-
-            print('\nEpoch: %s lr: %s n: %s N: %s' % (e+1, self.LR, self.NEURONS_H, self.SAMPLES))
-
+            self.shuffle_sets(x, t)
+            confusion = np.zeros((10,10))
+            print('\n\n\n\nEpoch: %s lr: %s n: %s N: %s' % (e+1, self.LR, self.NEURONS_H, self.SAMPLES))
+            if DEBUG:
+                print("\nu_h")
+                print(u_h[0])
+                print("\nu_o[0]")
+                print(u_o[0])
+                print("\nw_h[0]")
+                print(self.w_h[0])
+                print("\nw_o[0]")
+                print(self.w_o[0])
             # Get hidden units
             n_h = np.dot(x, self.w_h)
             # print("n_h = np.dot(x, self.w_h)\n", n_h)
             # Sigmoid
-            self.activate(n_h)
+            n_h = self.activate(n_h)
             # Add bias
             n_h = np.c_[n_h,np.ones(self.SAMPLES)]
             # Get outputs
             n_o = np.dot(n_h, self.w_o)
-            # Sigmoid
-            self.activate(n_o)
-            # print("n_o[0]\n", n_o[0])
-            # Activate max of outputs
+            if DEBUG:
+                print("\n\n\tActivations")
+                print("\nn_h[0]")
+                print(n_h[0])
+                print("\nn_o[0]")
+                print(n_o[0])
+                print("\nt[0]")
+                print(t[0])
+
+            # 1 Activate max of outputs by storing activations of n_o in predictions array.
+            #     * predictions array is used to compute confusion matrix.
+            # 2 Activate on output neurons.
+            # 3 Find the max of each sample in predictions and give it a 1 there, 0 otherwise.
+            # 4 Turn target array into array of 0.9s and 0.1s.
+            #     * forcalculating deltas.
+            # 
+            predictions = np.empty((np.shape(n_o)),dtype="float32")
+            predictions = self.activate(n_o)
+            n_o = self.activate(n_o)
             for N in range(self.SAMPLES):
-                n_o[N] = np.where(n_o[N]>=np.amax(n_o[N]),1,0)
+                # predictions[N] = np.where(predictions[N]>=np.amax(predictions[N]),1,0)
+                predictions[N] = np.where(predictions[N]>=np.amax(predictions[N]),1,0)
             # Set target value t_k for output unit k to 0.9 if input is correct, 0.1 otherwise
-            target_k = n_o * t
+            target_k = predictions * t
             for N in range(self.SAMPLES):
-                target_k[N] = np.where(target_k[N]==1,0.9,0.1)
-            # print("n_h[0]\n", n_h[0])
-            # print("n_o[0]\n", n_o[0])
+                target_k[N] = np.where(t[N]==1,0.9,0.1)
 
+            # Backprop
+
+            if DEBUG:
+                print("\npredictions[0:10]")
+                print(predictions[0:10])
+                print("\ntarget_k[0:10]")
+                print(target_k[0:10])
+                print("\n\nn_o[0]")
+                print(n_o[0])
             # Output deltas
-            # o_deltas = n_o * (1-n_o) * (t-n_o)
+            o_deltas = np.empty((self.SAMPLES, self.NEURONS))
             o_deltas = n_o * (1-n_o) * (target_k-n_o)
-            # print("n_o[0]\n", n_o[0])
-            # print("t[0]\n", t[0])
-            # print("target_k[0]\n", target_k[0])
-            # print("o_deltas[0]\n", o_deltas[0])
+            if DEBUG:
+                print("\no_deltas = n_o * (1-n_o) * (target_k-n_o)")
+                print("\no_deltas[0]")
+                print(o_deltas[0])
+                print("\n\nw_o[0]")
+                print(self.w_o[0])
+                print("\nn_h[0]")
+                print(n_h[0])
             # Hidden deltas
+            h_deltas = np.empty((self.SAMPLES, self.NEURONS_H+1))
             h_deltas = n_h * (1-n_h) * np.dot(o_deltas,np.transpose(self.w_o))
-            # print('w_o[0]\n', self.w_o[0])
-            # print("o_deltas[0]\n", o_deltas[0])
-            # print("h_deltas[0]\n", h_deltas[0])
-
+            if DEBUG:
+                print("\nh_deltas = n_h * (1-n_h) * np.dot(o_deltas,np.transpose(self.w_o))")
+                print("\nh_deltas")
+                print(h_deltas)
+                print("\nu_h[-2:]")
+                print(u_h[-2:])
             # Input to hidden weight update
-            # print("x[0]\n", x[0])
-            # print("np.transpose(x)[0]\n", np.transpose(x)[0])
-            # print("h_deltas[:,:-1]\n", h_deltas[:,:-1])
-            # print("u_h:%sx%s" % (u_h.shape[0], u_h.shape[1]))
-            # print("u_h[0]\n", u_h[0])
-            u_h = self.LR * np.dot(np.transpose(x), h_deltas[:,:-1]) + self.ALPHA * u_h
-            # print("after u_h:%sx%s" % (u_h.shape[0], u_h.shape[1]))
-            # print("u_h[0]\n", u_h[0])
-            # print("w_h[0]\n",self.w_h[0])
+            u_h = self.LR * np.dot(np.transpose(x), h_deltas[:,:-1]) + self.ALPHA * u_h - self.LAMBDA * u_h
+            if DEBUG:
+                print("\nu_h = self.LR * np.dot(np.transpose(x), h_deltas[:,:-1]) + self.ALPHA * u_h")
+                print("\nu_h:%sx%s" % u_h.shape)
+                print("\nu_h[-2:]")
+                print(u_h[-2:])
+                print("\nw_h[0]")
+                print(self.w_h[0])
             self.w_h += u_h
-            # print("w_h[0]\n",self.w_h[0])
-
+            if DEBUG:
+                print("\nself.w_h += u_h")
+                print("\nw_h[0]")
+                print(self.w_h[0])
+                print("\nn_h[0]")
+                print(n_h[0])
+                print("\no_deltas")
+                print(o_deltas[0])
+                print("\nu_o")
+                print(u_o[0])
             # Hidden to output weight update
-            # print("u_o:%sx%s" % (u_o.shape[0], u_o.shape[1]))
-            # print("u_o[0]\n", u_o[0])
             u_o = self.LR * np.dot(np.transpose(n_h), o_deltas) + self.ALPHA * u_o
-            # print("after u_o:%sx%s" % (u_o.shape[0], u_o.shape[1]))
-            # print("u_o[0]\n", u_o[0])
+            if DEBUG:
+                print("\nu_o = self.LR * np.dot(np.transpose(n_h), o_deltas) + self.ALPHA * u_o")
+                print("\nu_o[0]")
+                print(u_o[0])
+                print("\nw_o[0]")
+                print(self.w_o[0])
             self.w_o += u_o
-            # print("w_o:%sx%s" % (self.w_o.shape[0], self.w_o.shape[1]))
-            # print("w_o[0]\n",self.w_o[0])
+            if DEBUG:
+                print("\nself.w_o += u_o")
+                print("\nw_o[0]")
+                print(self.w_o)
 
-            self.get_confusion(t, n_o)
+            self.get_confusion(confusion, t, predictions)
 
-        # hu == 'hidden units', m == 'momentum'
-        save_stats0 = self.path + '/MNIST/train_hu' + f'{int(self.NEURONS_H):03d}'
-        save_stats1 = '-m' + f'{int(self.ALPHA*1000):03d}'
-        save_stats2 = '-ex' + str(self.SAMPLES)
-        save_stats = save_stats0 + save_stats1 + save_stats2
-        # save_stats = self.path+'/train_hu.csv'
+        # Save the stats of each epoch. First element in array number of hidden units
+        # and the second momentum. hu == 'hidden units', m == 'momentum'
+        #
+        save_stats = (self.path + '/MNIST/train_hu' + f'{int(self.NEURONS_H):03d}'
+                      + '-m' + f'{int(self.ALPHA*1000):03d}'
+                      + '-ex' + str(self.SAMPLES) + '.csv')
         np.savetxt(fname=save_stats, X=self.CORRECT, delimiter=',')
+        print("Saved file as %s" % save_stats)
 
-            # Update confusion matrix
-            # for N in range(self.SAMPLES):
-            #     self.n_o[N] = np.where(self.n_o[N]>=np.amax(self.n_o[N]),1,0)
-            # temp_target = np.zeros((self.SAMPLES,self.NEURONS))
-            # for N in range(self.SAMPLES):
-            #     temp_target[N] = np.where(self.t[N]>=np.amax(self.t[N]),1,0)
-
-    # def backward(self, x, t, u_h, u_o):
-        # Get deltas
-
-    def get_confusion(self, t, n_o):
-        # Update confusion matrix
-        # for N in range(self.SAMPLES):
-            # n_o[N] = np.where(n_o[N]>=np.amax(n_o[N]),1,0)
-
-        # temp_target = np.zeros((self.SAMPLES,self.NEURONS))
-        # for N in range(self.SAMPLES):
-        #     temp_target[N] = np.where(t[N]>=np.amax(t[N]),1,0)
-
-        confusion = np.dot(np.transpose(t), n_o)
-        accuracy = np.trace(confusion) / self.SAMPLES
+    # Write to confusion matrix
+    def get_confusion(self, conf, t, pred):
+        if DEBUG:
+            print("\nt")
+            print(t)
+            print("\npred")
+            print(pred)
+        conf = np.dot(np.transpose(t), pred)
+        accuracy = np.trace(conf) / self.SAMPLES
         self.CORRECT.append(accuracy)
-        # print("confusion",confusion)
+        print("\nconf")
+        print(conf)
         print('  %:', round(accuracy*100, 4))
 
 def main():
-    # inputs, samples, hidden units, learning rate, momentum, epochs
-    run = mlp(784, 60000, 50, 0.1, 0.9, 50)
+    # inputs, samples, hidden units, learning rate, momentum, decay, epochs
+    run = mlp(784, 60000, 10, 0.1, 0.9, .2, 6)
     inputs, targets = run.load()
     run.train(inputs, targets)
-    # run = mlp()
-    # run.forward()
-    # run.back
 
 if __name__ == '__main__':
     main()

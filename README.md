@@ -28,3 +28,7 @@ Convert `t` (target) and `n_o` arrays to get max arg, then compute confusion mat
 Was able to get better results (doesn't shoot off to `inf` or `nan`) by converting targets to 0.9 or 0.1 before calculating deltas but % correct stays constant (<20% and stays absolutely constant). Confusion matrix doesn't seem to be a problem. Shuffling could help? 
 
 ### 10/31
+
+Added shuffle and weight decay to training function.
+
+On second epoch, output neurons values (dot product of hidden neurons and hidden weights) are too low to go through activation; they just become 0.
