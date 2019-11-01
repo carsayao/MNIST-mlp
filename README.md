@@ -32,3 +32,9 @@ Was able to get better results (doesn't shoot off to `inf` or `nan`) by converti
 Added shuffle and weight decay to training function.
 
 On second epoch, output neurons values (dot product of hidden neurons and hidden weights) are too low to go through activation; they just become 0.
+
+This causes `predictions` matrix to become all 1's after the first epoch. This matrix is dotted with the target array to construct a confusion matrix. The confusion matrix gives bad results because of this bug.
+
+Changed `train.py` to read directly from file. Shuffling arrays loaded from `dat` files might've cause some issues.
+
+Need to work on why this confusion matrix is not working. Should start looking at places I modify `predictions`.
