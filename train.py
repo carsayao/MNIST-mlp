@@ -146,8 +146,8 @@ class mlp:
             # Hold onto our predictions
             predictions = np.zeros((self.SAMPLES,self.NEURONS))
 
-            print("\n\nEpoch:%s lr:%s n:%s N:%s decay:%s"
-                   % (e+1, self.LR, self.HIDDEN, self.SAMPLES, self.LAMBDA))
+            print("\n\nEpoch:%s lr:%s n:%s N:%s alpha:%s"
+                   % (e+1, self.LR, self.HIDDEN, self.SAMPLES, self.ALPHA))
 
             for N in range(self.SAMPLES):
 
@@ -174,7 +174,7 @@ class mlp:
                 u_h = (self.LR
                     * (np.dot((np.transpose((inputs[N])[np.newaxis])),
                            np.array(h_deltas[:-1])[np.newaxis]))
-                    + (self.ALPHA * u_h))
+                    + (self.ALPHA * u_h)) #- self.LAMBDA*u_h)
                 self.w_h += u_h
 
                 # Add predictions of sample to predictions array to compute confusion matrix
@@ -227,7 +227,7 @@ class mlp:
 def main():
     # title, inputs, samples, hidden units, learning rate, momentum, decay, epochs
     title = "Experiment 1: Vary Hidden Units"
-    hiddens = 20
+    hiddens = 100
     momentu = .9
     epochs  = 50
     inputs  = 784
@@ -236,7 +236,7 @@ def main():
     learnin = .1
     decay   = .5
     print("epochs:%s samples:%s hiddens:%s lr:%s alpha:%s"
-          %s
+          %
          (epochs, samples, hiddens, learnin, momentu))
     run = mlp(title, inputs, samples, hiddens, learnin, momentu, decay, epochs)
     run.train()
