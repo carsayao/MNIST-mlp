@@ -35,21 +35,21 @@ if arg == 'array':
     # newfp[:,1:] = newfp[:,1:]
     matrix = np.array([[1,2,3,4]
                       ,[5,6,7,8]])
-    print(matrix) 
-    print(matrix.shape[0], matrix.shape[1])
-    sum = np.sum(matrix,axis=1)
-    print('np.sum(matrix),axis=1 : %s' % (sum))
+    # print(matrix) 
+    # print(matrix.shape[0], matrix.shape[1])
+    # sum = np.sum(matrix,axis=1)
+    # print('np.sum(matrix),axis=1 : %s' % (sum))
     # matrix = np.c_[matrix, np.ones(2)]
     # print(matrix)
     # print(matrix.shape[0], matrix.shape[1])
 
-    print('exp\n',np.exp(matrix))
-    print('np.sum(np.exp(matrix),axis=1)\n',np.sum(np.exp(matrix),axis=1))
-    mul = np.sum(np.exp(matrix),axis=1)*np.ones((1,np.shape(matrix)[0]))
-    print('mul\n',mul)
-    print('tra\n',np.transpose(np.transpose(np.exp(matrix))/mul))
-    matrix = 1 / (1 + np.exp(-matrix))
-    print('mat\n',matrix)
+    # print('exp\n',np.exp(matrix))
+    # print('np.sum(np.exp(matrix),axis=1)\n',np.sum(np.exp(matrix),axis=1))
+    # mul = np.sum(np.exp(matrix),axis=1)*np.ones((1,np.shape(matrix)[0]))
+    # print('mul\n',mul)
+    # print('tra\n',np.transpose(np.transpose(np.exp(matrix))/mul))
+    # matrix = 1 / (1 + np.exp(-matrix))
+    # print('mat\n',matrix)
     # m = np.empty((10,2),dtype='float32')
     # m.fill(.1)
     # print('dim m: %s x %s' % (m.shape[0], m.shape[1]))
@@ -76,35 +76,6 @@ if arg == 'array':
     # print('y:%sy%s' % (y.shape[0],y.shape[1]))
     # print('x:%sx%s' % (x.shape[0],x.shape[1]))
     
-    h_deltas = np.ones((SAMPLES,NEURONS_H+1))
-    h_deltas = np.array([[1,2,3,4],
-                         [5,6,7,8]])
-    print('\nh_deltas:%sx%s' % (h_deltas.shape[0],h_deltas.shape[1]))
-    print(h_deltas)
-    h_deltas = np.c_[h_deltas,np.zeros(2)]
-    print('\nh_deltas dim after np.c_[]:%sx%s' % (h_deltas.shape[0],h_deltas.shape[1]))
-    print(h_deltas)
-    # chop = h_deltas[:-1:]
-    # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
-    # print(chop, '\n')
-    # chop = h_deltas[:1,:]
-    # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
-    # print(chop, '\n')
-    # chop = h_deltas[:,1:]
-    # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
-    # print(chop, '\n')
-    # chop = h_deltas[:,1:1]
-    # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
-    # print(chop, '\n')
-
-    # Chop first column
-    chop = h_deltas[:,1:]
-    print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
-    print(chop, '\n')
-    # Chop last column
-    chop1 = h_deltas[:,:-1]
-    print('chop1:%sx%s' % (chop1.shape[0],chop1.shape[1]))
-    print(chop1, '\n')
 
 if arg == 'format':
     print('hello ' + f'{int(ALPHA*1000):03d}')
@@ -141,6 +112,32 @@ if arg == "shuffle":
     print(samples)
     print("targets")
     print(targets)
+    print("shape [0,1,2,3]")
+    arr = np.array([0,1,2,3])
+    print(arr)
+    # np.reshape(arr,(-1,1))
+    # arr = np.transpose(np.matrix(arr))
+    # arr = np.transpose(np.array(arr))
+    print("reshape")
+    arr = np.array(arr)[np.newaxis]
+    arr = np.transpose(arr)
+    print(arr)
+
+    # pended = np.append(arr, 1)
+    # print(pended)
+    # print(pended[:-1])
+    # pred = np.empty((3,2))
+    pred = []
+    ones = [0,0]
+    # print(pred)
+
+    # appred = np.append(pred,ones, axis=1)
+    # appred = np.append([appred],[ones], axis=1)
+    # appred = np.append([appred],[ones], axis=1)
+    # appred = np.append([appred],[ones], axis=1)
+    # appred = np.append([appred],[ones], axis=1)
+    # appred = np.append([appred],[ones], axis=1)
+    # print(appred)
 
 if arg == "tuple":
     s = 4
@@ -194,3 +191,89 @@ if arg=="pred":
                        [9,-10,11,12]])
     print(np.transpose(matrix))
     # print(-matrix)
+
+if arg=="slice":
+    # h_deltas = np.ones((SAMPLES,NEURONS_H+1))
+    h_deltas = np.array([[1,2,3,4],
+                         [2,6,7,8],
+                         [3,1,2,3],
+                         [4,8,7,6],
+                         [5,1,1,1]])
+    zer = np.zeros(h_deltas.shape[0])
+
+    print('\nh_deltas:%sx%s' % (h_deltas.shape[0],h_deltas.shape[1]))
+    print(h_deltas)
+    print("\nzer")
+    print(zer, '\n')
+
+    h_deltas = np.c_[h_deltas,zer]
+    print('\nh_deltas dim after np.c_[]:%sx%s' % (h_deltas.shape[0],h_deltas.shape[1]))
+    print(h_deltas)
+
+    # Remove bottom row
+    chop = h_deltas[:-1:]
+    print('\nchop:%sx%s' % (chop.shape[0],chop.shape[1]))
+    print(chop, '\n')
+
+    # Remove bottom row
+    chop = h_deltas[:-1,:]
+    print('\nchop:%sx%s' % (chop.shape[0],chop.shape[1]))
+    print(chop, '\n')
+
+    # Remove first n col
+    chop = h_deltas[:3,:]
+    print('\nchop:%sx%s' % (chop.shape[0],chop.shape[1]))
+    print(chop, '\n')
+
+    # # Remove first 2 col
+    # chop = h_deltas[:,2:]
+    # print('\nchop:%sx%s' % (chop.shape[0],chop.shape[1]))
+    # print(chop, '\n')
+
+    # # Preserve 1st row
+    # chop = h_deltas[:1,:]
+    # print('\nchop:%sx%s' % (chop.shape[0],chop.shape[1]))
+    # print(chop, '\n')
+    
+    # # Remove 1st and last col, preserve first row
+    # chop = h_deltas[:,1:-1]
+    # print('\nchop:%sx%s' % (chop.shape[0],chop.shape[1]))
+    # print(chop[0], '\n')
+
+    # # Chop first column
+    # chop = h_deltas[:,1:]
+    # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
+    # print(chop, '\n')
+
+    # # Chop last column
+    # chop = h_deltas[:,:-1]
+    # print('chop:%sx%s' % (chop.shape[0],chop.shape[1]))
+    # print(chop, '\n')
+
+if arg=="copy":
+    orig = np.ones((3,5))
+    col  = np.zeros(3)
+    copy = np.c_[orig,col]
+    print(copy)
+    print(orig)
+    orig = np.c_[copy,col]
+    print(copy)
+    print(orig)
+
+    def reassign(alist):
+        alist = [0,1]
+    alist = [0]
+    reassign(alist)
+    print("\nalist",alist)
+
+    def reassignret(blist):
+        blist = [0,1]
+        return blist
+    blist = [0]
+    blist = reassignret(blist)
+    print("\nblist",blist)
+
+    lista = [0]
+    listb = lista
+    listb.append(1)
+    print("\nlista",lista)

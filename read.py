@@ -2,6 +2,7 @@ from mlxtend.data import loadlocal_mnist
 import numpy as np
 import os
 import sys
+FLOAT=True
 
 # Number of inputs
 INPUTS = 784
@@ -13,9 +14,10 @@ SAMPLES = 60000
 SAMPLES_T = 10000
 # Array of epochs to store correct %
 CORRECT = []
-# Relative paths
+# Absolute path
 path = os.path.dirname(os.path.realpath(__file__))
 path = path + '/MNIST/rawdata/'
+# Relative paths
 train_images_raw = path + 'train-images.idx3-ubyte'
 train_labels_raw = path + 'train-labels.idx1-ubyte'
 test_images_raw = path + 't10k-images.idx3-ubyte'
@@ -26,6 +28,7 @@ test_images_dat = path + '../test_images.dat'
 test_labels_dat = path + '../test_labels.dat'
 
 def read_to_dat():
+    # Load raw images from ubytes
     def read_train_data():
         x, y = loadlocal_mnist(
                 images_path = train_images_raw,
@@ -37,23 +40,14 @@ def read_to_dat():
                 labels_path = test_labels_raw)
         return x, y
     def convert_targets_train(train_array):
-        target_array = np.zeros((SAMPLES, NEURONS), dtype=float)
-
-        # target_array = np.empty((SAMPLES, NEURONS), dtype='float32')
-        # target_array.fill(0.1)
-
+        target_array = np.zeros((SAMPLES, NEURONS), dtype="float32")
         for t in range(SAMPLES):
-            # target_array[t][int(train_array[t])] = 0.9
             target_array[t][int(train_array[t])] = 1
-        print(target_array[59999])
         return target_array
     def convert_targets_test(test_array):
-        # target_array = np.zeros((SAMPLES_T, NEURONS), dtype='float32')
-        target_array = np.empty((SAMPLES_T, NEURONS), dtype="float32")
-        target_array.fill(0.1)
+        target_array = np.zeros((SAMPLES_T, NEURONS), dtype='float32')
         for t in range(SAMPLES_T):
-            target_array[t][int(test_array[t])] = 0.9
-        print(target_array[9999])
+            target_array[t][int(test_array[t])] = 1
         return target_array
 
     train_images, train_labels = read_train_data()
@@ -63,6 +57,8 @@ def read_to_dat():
     # Create memmap pointer on disk and read into .dats
     fp0 = np.memmap(train_images_dat, dtype='float64',
                     mode='w+', shape=(SAMPLES,INPUTS))
+    # fp0 = np.memmap(train_images_dat, mode='w+', shape=(SAMPLES,INPUTS))
+    # Copy into file pointer
     fp0[:] = train_images[:]
     del fp0
     fp1 = np.memmap(train_labels_dat, dtype='float64',
@@ -70,9 +66,9 @@ def read_to_dat():
     fp1[:] = train_labels[:]
     del fp1
 
+    # Same as above but with test samples
     test_images, test_labels = read_test_data()
     test_labels = convert_targets_test(test_labels)
-    print(test_labels[9999])
     test_images = test_images / 255
     fp2 = np.memmap(test_images_dat, dtype='float64',
                     mode='w+', shape=(SAMPLES_T,INPUTS))

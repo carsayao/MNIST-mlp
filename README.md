@@ -38,3 +38,5 @@ This causes `predictions` matrix to become all 1's after the first epoch. This m
 Changed `train.py` to read directly from file. Shuffling arrays loaded from `dat` files might've cause some issues.
 
 Need to work on why this confusion matrix is not working. Should start looking at places I modify `predictions`.
+
+Read in all with `memmap`, then take a random sampling of the data.
