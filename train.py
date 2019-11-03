@@ -237,7 +237,7 @@ def main():
     decay   = .5
     print("epochs:%s samples:%s hiddens:%s lr:%s alpha:%s"
           %s
-         (epochs, samples, hiddens, learnin, momentu)
+         (epochs, samples, hiddens, learnin, momentu))
     run = mlp(title, inputs, samples, hiddens, learnin, momentu, decay, epochs)
     run.train()
 
