@@ -52,8 +52,8 @@ class mlp:
         for n in [self.CORRECT, self.CORRECT_TEST]:
             plt.plot(xaxis, n)
         title_info = (self.TITLE
-                    + "; n=" + str(self.HIDDEN)
-                    + ", alpha=" + str(self.ALPHA)
+                   + "; n=" + str(self.HIDDEN)
+                   + ", alpha=" + str(self.ALPHA))
         ax.set(xlabel="epoch", ylabel="accuracy", title=title_info)
         ax.legend(("train", "test"), loc="lower right")
         plt.xlim(xmax=self.EPOCHS+1, xmin=0)
