@@ -58,7 +58,7 @@ class mlp:
         ax.legend(("train", "test"), loc="lower right")
         plt.xlim(xmax=self.EPOCHS+1, xmin=0)
         # plt.ylim(ymax=1, ymin=0)
-        ax.yaxis.set_ticks(np.arange(0, 1, .1))
+        # ax.yaxis.set_ticks(np.arange(0, 1, .1))
         ax.grid()
 
         plt.savefig(self.path + "/MNIST/" + save_stats + ".png")
@@ -229,7 +229,7 @@ def main():
     title = "Experiment 1: Vary Hidden Units"
     hiddens = 20
     momentu = .9
-    epochs  = 10
+    epochs  = 5
     inputs  = 784
     samples = 60000
 
