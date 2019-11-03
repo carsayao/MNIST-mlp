@@ -229,12 +229,15 @@ def main():
     title = "Experiment 1: Vary Hidden Units"
     hiddens = 20
     momentu = .9
-    epochs  = 5
+    epochs  = 50
     inputs  = 784
     samples = 60000
 
     learnin = .1
     decay   = .5
+    print("epochs:%s samples:%s hiddens:%s lr:%s alpha:%s"
+          %s
+         (epochs, samples, hiddens, learnin, momentu)
     run = mlp(title, inputs, samples, hiddens, learnin, momentu, decay, epochs)
     run.train()
 
