@@ -16,7 +16,7 @@ class mlp:
         self.NEURONS = 10
         self.HIDDEN = hidden
         self.SAMPLES = N
-        self.TEST_SAMPLES = 10000
+        self.SAMPLES_TEST = 10000
         self.EPOCHS = epochs
         self.LR = lr
         self.ALPHA = mom
@@ -84,18 +84,21 @@ class mlp:
         return copy_inputs[:self.SAMPLES,:], copy_targets[:self.SAMPLES,:]
     
     def load_test(self):
-        load_inputs  = np.memmap(self.train_images_dat,
+        load_inputs  = np.memmap(self.test_images_dat,
                                  dtype="float64", mode='r',
-                                 shape=(60000,784))
-        load_targets = np.memmap(self.train_labels_dat,
+                                 shape=(10000,784))
+        load_targets = np.memmap(self.test_labels_dat,
                                  dtype="float64",
                                  mode='r',
-                                 shape=(60000,10))
-        return load_inputs[:self.SAMPLES,:], load_targets[:self.SAMPLES,:]
+                                 shape=(10000,10))
+        return load_inputs[:self.SAMPLES_TEST,:], load_targets[:self.SAMPLES_TEST,:]
     
     # Sigmoid function
     def activate(self, n):
         return expit(n)
+    
+    # def check_balanced(self, targets):
+        # for N in range(targets.shape[0]):
 
     def shuffle_sets(self, samples, targets):
         rng_state = np.random.get_state()
@@ -111,23 +114,23 @@ class mlp:
     def test(self):
         test_images, test_labels = self.load_test()
         # Set test sample size
-        self.TEST_SAMPLES = test_labels.shape[0]
+        self.SAMPLES_TEST = test_labels.shape[0]
         # Bias
-        test_inputs = np.c_[test_images, np.ones(self.TEST_SAMPLES)]
+        test_inputs = np.c_[test_images, np.ones(self.SAMPLES_TEST)]
         # Copies
         test_target_array = np.zeros((np.shape(test_labels)))
         np.copyto(test_target_array, test_labels)
         # Init predictions array
-        test_predictions = np.zeros((self.TEST_SAMPLES,self.NEURONS))
+        test_predictions = np.zeros((self.SAMPLES_TEST,self.NEURONS))
         # Test samples but this time only with forward prop
-        for N in range(self.TEST_SAMPLES):
+        for N in range(self.SAMPLES_TEST):
             test_o, test_tar_k, test_prediction_n = self.forward(test_inputs[N],
                                                                  test_target_array[N])
             test_predictions[N] = test_prediction_n
         self.CORRECT_TEST_CONF, acc = self.get_confusion(test_target_array,
                                                          test_predictions)
         self.CORRECT_TEST.append(acc)
-        print(self.CORRECT_TEST)
+        #print(self.CORRECT_TEST)
 
     # Params: x==inputs, t==targets, n==neurons, w==weights, u==update,
     #         h==hidden, o==output
@@ -183,10 +186,10 @@ class mlp:
             # Append the returned accuracy to correctness array
             self.CORRECT_CONF, train_acc = self.get_confusion(target_array, predictions)
             self.CORRECT.append(train_acc)
-            print(self.CORRECT)
+            #print(self.CORRECT)
 
             # Run tests after every epoch
-            print("\nRunning test\n")
+            print("\nRunning test")
             self.test()
 
         # Save results after finished epochs
@@ -227,17 +230,19 @@ class mlp:
 def main():
     # title, inputs, samples, hidden units, learning rate, momentum, decay, epochs
     title = "Experiment 1: Vary Hidden Units"
-    hiddens = 100
-    momentu = .9
+    hiddens = 20
+    momentu = 0.9
     epochs  = 50
     inputs  = 784
     samples = 60000
 
     learnin = .1
     decay   = .5
+    #for n in [20, 50, 100]:
+    #momentu = n
     print("epochs:%s samples:%s hiddens:%s lr:%s alpha:%s"
-          %
-         (epochs, samples, hiddens, learnin, momentu))
+            %
+            (epochs, samples, hiddens, learnin, momentu))
     run = mlp(title, inputs, samples, hiddens, learnin, momentu, decay, epochs)
     run.train()
 
