@@ -1,6 +1,9 @@
 --expr 1, n=20--
 5070.91user 7348.66system 26:51.55elapsed 770%CPU (0avgtext+0avgdata 1561952maxresident)k
 0inputs+88outputs (0major+806300minor)pagefaults 0swaps
+
+5006.22user 7525.75system 27:41.72elapsed 754%CPU (0avgtext+0avgdata 1556776maxresident)k
+0inputs+80outputs (0major+473602minor)pagefaults 0swaps
 --n=50--
 9216.53user 12595.63system 46:29.58elapsed 781%CPU (0avgtext+0avgdata 1562384maxresident)k
 0inputs+80outputs (0major+813790minor)pagefaults 0swaps

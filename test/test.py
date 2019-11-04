@@ -11,7 +11,7 @@ NEURONS_H = 50
 # Number of examples to train
 SAMPLES = 60000
 # Number of test images
-SAMPLES_T = 10000
+SAMPLES_TEST = 10000
 # Number of epochs
 EPOCHS = 3
 # Learning Rate
@@ -27,7 +27,10 @@ arg = sys.argv[1]
 # arg = "tuple"
 
 path = os.path.dirname(os.path.realpath(__file__))
-test_images_dat = path + '/../MNIST/test_images.dat'
+train_images_dat= path + "/../MNIST/train_images.dat"
+train_labels_dat= path + "/../MNIST/train_labels.dat"
+test_images_dat = path + "/../MNIST/test_images.dat"
+test_labels_dat = path + "/../MNIST/test_labels.dat"
 
 if arg == 'array':
 # if True:
@@ -277,3 +280,48 @@ if arg=="copy":
     listb = lista
     listb.append(1)
     print("\nlista",lista)
+
+if arg == "sum":
+    SAMPLES = 30000
+    def load():
+        load_inputs  = np.memmap(train_images_dat,
+                                 dtype="float64",
+                                 mode='r',
+                                 shape=(60000,784))
+        load_targets = np.memmap(train_labels_dat,
+                                 dtype="float64",
+                                 mode='r',
+                                 shape=(60000,10))
+        copy_inputs, copy_targets = shuffle_sets(load_inputs,
+                                                      load_targets)
+        return copy_inputs[:SAMPLES,:], copy_targets[:SAMPLES,:]
+    def shuffle_sets(samples, targets):
+        rng_state = np.random.get_state()
+        copy_samples = np.empty((np.shape(samples)))
+        copy_samples[:] = samples
+        np.random.shuffle(copy_samples)
+        np.random.set_state(rng_state)
+        copy_targets = np.empty((np.shape(targets)))
+        copy_targets[:] = targets
+        np.random.shuffle(copy_targets)
+        return copy_samples[:SAMPLES,:], copy_targets[:SAMPLES,:]
+    def check_balanced(targets):
+        sum_train_targets = np.zeros((SAMPLES,NEURONS))
+        sum_train_targets = np.sum(targets, axis=0)
+        total = np.sum(sum_train_targets)
+        for n in range(10):
+            if sum_train_targets[n]/total >= .15:
+                return False
+            if sum_train_targets[n]/total <= .05:
+                return False
+        return True
+    # train_targets, test_targets = load_test()
+
+    train_targets, train_labels = load()
+    while check_balanced(train_labels) == False:
+        # train_targets, test_targets = load_test()
+        train_images, train_labels = load()
+        print("False",np.sum(train_labels, axis=0))
+    summ = np.sum(train_labels, axis=0)
+    tota = np.sum(summ)
+    print("True", summ/tota)

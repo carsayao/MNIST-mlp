@@ -93,13 +93,26 @@ class mlp:
                                  shape=(10000,10))
         return load_inputs[:self.SAMPLES_TEST,:], load_targets[:self.SAMPLES_TEST,:]
     
+    # Check to make sure our smaller, randomized training set is evenly distributed
+    def check_balanced(self, targets):
+        # Copy
+        sum_train_targets = np.zeros((self.SAMPLES,self.NEURONS))
+        # Sum columns
+        sum_train_targets = np.sum(targets, axis=0)
+        # Get total number of samples
+        total = self.SAMPLES
+        for n in range(self.NEURONS):
+            if sum_train_targets[n]/total >= .15:
+                return False
+            if sum_train_targets[n]/total <= .05:
+                return False
+        return True
+    
     # Sigmoid function
     def activate(self, n):
         return expit(n)
-    
-    # def check_balanced(self, targets):
-        # for N in range(targets.shape[0]):
 
+    # Shuffle sets the same by storing and reusing the state
     def shuffle_sets(self, samples, targets):
         rng_state = np.random.get_state()
         copy_samples = np.empty((np.shape(samples)))
@@ -141,6 +154,9 @@ class mlp:
 
         for e in range(self.EPOCHS):
             x, t = self.load()
+            # Check that our set of training data is evenly distributed
+            while self.check_balanced(t) == False:
+                x, t = self.load()
             # Add bias, copy arrays over
             inputs = np.c_[x, np.ones(self.SAMPLES)]
             target_array = np.zeros((np.shape(t)))
@@ -230,12 +246,12 @@ class mlp:
 
 def main():
     # title, inputs, samples, hidden units, learning rate, momentum, decay, epochs
-    title = "Experiment 1: Vary Hidden Units"
-    hiddens = 20
+    title = "Experiment 3: Vary training examples"
+    hiddens = 100
     momentu = 0.9
-    epochs  = 50
+    epochs  = 3
     inputs  = 784
-    samples = 60000
+    samples = int(60000/4)
 
     learnin = .1
     decay   = .5
