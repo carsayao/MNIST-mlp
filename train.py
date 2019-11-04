@@ -223,7 +223,8 @@ class mlp:
     # Write to confusion matrix
     def get_confusion(self, target, pred):
         conf = np.array(np.dot(np.transpose(target), pred))
-        accuracy = np.trace(conf) / self.SAMPLES
+        samples = target.shape[0]
+        accuracy = np.trace(conf) / samples
         print("  %:", round(accuracy*100, 4))
         return conf, accuracy
 
