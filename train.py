@@ -30,10 +30,10 @@ class mlp:
         # Absolute path
         self.path = os.path.dirname(os.path.realpath(__file__))
         # Relative paths
-        self.train_images_dat = self.path + "/MNIST/train_images.dat"
-        self.train_labels_dat = self.path + "/MNIST/train_labels.dat"
-        self.test_images_dat = self.path + "/MNIST/test_images.dat"
-        self.test_labels_dat = self.path + "/MNIST/test_labels.dat"
+        self.train_images_dat = self.path + "/../MNIST/mlp/train_images.dat"
+        self.train_labels_dat = self.path + "/../MNIST/mlp/train_labels.dat"
+        self.test_images_dat  = self.path + "/../MNIST/mlp/test_images.dat"
+        self.test_labels_dat  = self.path + "/../MNIST/mlp/test_labels.dat"
 
         # Set up randomized weights from -.05 to .05
         self.w_o = np.random.uniform(-0.05,0.05,

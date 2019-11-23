@@ -16,16 +16,17 @@ SAMPLES_T = 10000
 CORRECT = []
 # Absolute path
 path = os.path.dirname(os.path.realpath(__file__))
-path = path + '/MNIST/rawdata/'
+path = path + '/../MNIST/rawdata/'
 # Relative paths
+print(path)
 train_images_raw = path + 'train-images.idx3-ubyte'
 train_labels_raw = path + 'train-labels.idx1-ubyte'
-test_images_raw = path + 't10k-images.idx3-ubyte'
-test_labels_raw = path + 't10k-labels.idx1-ubyte'
-train_images_dat = path + '../train_images.dat'
-train_labels_dat = path + '../train_labels.dat'
-test_images_dat = path + '../test_images.dat'
-test_labels_dat = path + '../test_labels.dat'
+test_images_raw  = path + 't10k-images.idx3-ubyte'
+test_labels_raw  = path + 't10k-labels.idx1-ubyte'
+train_images_dat = path + '/../mlp/train_images.dat'
+train_labels_dat = path + '/../mlp/train_labels.dat'
+test_images_dat  = path + '/../mlp/test_images.dat'
+test_labels_dat  = path + '/../mlp/test_labels.dat'
 
 def read_to_dat():
     # Load raw images from ubytes
