@@ -2,6 +2,11 @@ env/
 *.sw*
 .vscode/
 out*
-*.dat
-rawdata/
 *~
+
+# MNIST data
+rawdata/
+
+# Memmap images
+memmap/
+*.dat

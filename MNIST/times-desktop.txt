@@ -18,3 +18,21 @@
 9462.14user 12424.89system 46:33.54elapsed 783%CPU (0avgtext+0avgdata 1563032maxresident)k
 0inputs+72outputs (0major+9024421minor)pagefaults 0swaps
 
+
+
+    hiddens = 10
+    momentu = 0.9 
+    epochs  = 10
+    inputs  = 784 
+    samples = 60000
+    learnin = .1
+    decay   = .5
+Non-acc
+143.56user 2.50system 2:26.34elapsed 99%CPU (0avgtext+0avgdata 1562128maxresident)k
+3160inputs+88outputs (9major+116486minor)pagefaults 0swaps
+
+
+real	19m17.735s
+user	19m15.317s
+sys	0m2.014s
+meegs@towerbuntu:

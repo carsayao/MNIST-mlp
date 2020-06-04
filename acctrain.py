@@ -1,10 +1,12 @@
+# Cupy train
+
 import os
 import sys
 import warnings
 from mlxtend.data import loadlocal_mnist
 import matplotlib
 import matplotlib.pyplot as plt
-import numpy as np
+import cupy as np
 from scipy.special import expit
 
 
@@ -30,10 +32,10 @@ class mlp:
         # Absolute path
         self.path = os.path.dirname(os.path.realpath(__file__))
         # Relative paths to memmaps
-        self.train_images_dat = self.path + "/MNIST/memmap/train_images.dat"
-        self.train_labels_dat = self.path + "/MNIST/memmap/train_labels.dat"
-        self.test_images_dat  = self.path + "/MNIST/memmap/test_images.dat"
-        self.test_labels_dat  = self.path + "/MNIST/memmap/test_labels.dat"
+        self.train_images_dat = self.path + "/MNIST/memmap/train_images.npy"
+        self.train_labels_dat = self.path + "/MNIST/memmap/train_labels.npy"
+        self.test_images_dat  = self.path + "/MNIST/memmap/test_images.npy"
+        self.test_labels_dat  = self.path + "/MNIST/memmap/test_labels.npy"
 
         # Set up randomized weights from -.05 to .05
         self.w_o = np.random.uniform(-0.05,0.05,
@@ -61,37 +63,34 @@ class mlp:
         # ax.yaxis.set_ticks(np.arange(0, 1, .1))
         ax.grid()
 
-        plt.savefig(self.path + "/MNIST/img/" + save_stats + ".png")
+        plt.savefig(self.path + "/MNIST/img/acc_" + save_stats + ".png")
 
         # Save confusion matrices
-        save_conf = (self.path + "/MNIST/confusion_matrices/train_conf_" + save_stats + ".csv")
-        np.savetxt(fname=save_conf, X=self.CORRECT_CONF, fmt='% 5d')
-        save_conf = (self.path + "/MNIST/confusion_matrices/test_conf_" + save_stats + ".csv")
-        np.savetxt(fname=save_conf, X=self.CORRECT_TEST_CONF, fmt='% 5d')
+        #save_conf = (self.path + "/MNIST/confusion_matrices/acc_train_conf_" + save_stats + ".csv")
+        #np.savetxt(fname=save_conf, X=self.CORRECT_CONF, fmt='% 5d')
+        #save_conf = (self.path + "/MNIST/confusion_matrices/acc_test_conf_" + save_stats + ".csv")
+        #np.savetxt(fname=save_conf, X=self.CORRECT_TEST_CONF, fmt='% 5d')
 
     # Load training images and labels from data and add bias to images
     def load(self):
-        load_inputs  = np.memmap(self.train_images_dat,
-                                 dtype="float64",
-                                 mode='r',
-                                 shape=(60000,784))
-        load_targets = np.memmap(self.train_labels_dat,
-                                 dtype="float64",
-                                 mode='r',
-                                 shape=(60000,10))
-        import pdb; pdb.set_trace()
-        copy_inputs, copy_targets = self.shuffle_sets(load_inputs,
-                                                      load_targets)
-        return copy_inputs[:self.SAMPLES,:], copy_targets[:self.SAMPLES,:]
+        load_inputs  = np.load(self.train_images_dat,
+                                 mmap_mode='r',
+                                 allow_pickle=True)
+        load_targets = np.load(self.train_labels_dat,
+                                 mmap_mode='r',
+                                 allow_pickle=True)
+        # copy_inputs, copy_targets = self.shuffle_sets(load_inputs,
+        #                                               load_targets)
+        return load_inputs, load_targets
+        #return copy_inputs[:self.SAMPLES,:], copy_targets[:self.SAMPLES,:]
     
     def load_test(self):
-        load_inputs  = np.memmap(self.test_images_dat,
-                                 dtype="float64", mode='r',
-                                 shape=(10000,784))
-        load_targets = np.memmap(self.test_labels_dat,
-                                 dtype="float64",
-                                 mode='r',
-                                 shape=(10000,10))
+        load_inputs  = np.load(self.test_images_dat,
+                                 mmap_mode='r',
+                                 allow_pickle=True)
+        load_targets = np.load(self.test_labels_dat,
+                                 mmap_mode='r',
+                                 allow_pickle=True)
         return load_inputs[:self.SAMPLES_TEST,:], load_targets[:self.SAMPLES_TEST,:]
     
     # Check to make sure our smaller, randomized training set is evenly distributed
@@ -111,7 +110,9 @@ class mlp:
     
     # Sigmoid function
     def activate(self, n):
-        return expit(n)
+        # 1/(1+exp(-x))
+        return 1/(1+np.exp(-n))
+        #return expit(n)
 
     # Shuffle sets the same by storing and reusing the state
     def shuffle_sets(self, samples, targets):
@@ -130,10 +131,11 @@ class mlp:
         # Set test sample size
         self.SAMPLES_TEST = test_labels.shape[0]
         # Bias
-        import pdb; pdb.set_trace()
-        test_inputs = np.c_[test_images, np.ones(self.SAMPLES_TEST)]
+        #test_inputs = np.c_[test_images, np.ones(self.SAMPLES_TEST)]
+        # NOTE: Need to add bias for cupy
+        test_inputs = np.column_stack((test_images, np.ones(self.SAMPLES_TEST)))
         # Copies
-        test_target_array = np.zeros((np.shape(test_labels)))
+        test_target_array = np.zeros(test_labels.shape)
         np.copyto(test_target_array, test_labels)
         # Init predictions array
         test_predictions = np.zeros((self.SAMPLES_TEST,self.NEURONS))
@@ -151,17 +153,19 @@ class mlp:
     #         h==hidden, o==output
     def train(self):
         # Initialize prev update arrays
-        u_h = np.zeros((np.shape(self.w_h)))
-        u_o = np.zeros((np.shape(self.w_o)))
+        u_h = np.zeros(self.w_h.shape)
+        u_o = np.zeros(self.w_o.shape)
 
         for e in range(self.EPOCHS):
             x, t = self.load()
             # Check that our set of training data is evenly distributed
-            while self.check_balanced(t) == False:
-                x, t = self.load()
+            # NOTE: check_balanced() won't work because CuPy doesn't have random.get_state
+            # while self.check_balanced(t) == False:
+            #     x, t = self.load()
             # Add bias, copy arrays over
-            inputs = np.c_[x, np.ones(self.SAMPLES)]
-            target_array = np.zeros((np.shape(t)))
+            #inputs = np.c_[x, np.ones(self.SAMPLES)]
+            inputs = np.column_stack((x, np.ones(self.SAMPLES)))
+            target_array = np.zeros((t.shape))
             np.copyto(target_array, t)
 
             # Hold onto our predictions
@@ -211,7 +215,7 @@ class mlp:
             self.test()
 
         # Save results after finished epochs
-        self.save()
+        #self.save()
 
     def forward(self, inputs, target_array):
         # Get hidden units
@@ -219,14 +223,15 @@ class mlp:
         # Sigmoid
         self.n_h = self.activate(self.n_h)
         # Add bias
-        self.n_h = np.append(self.n_h, 1)
+        self.n_h = np.hstack((self.n_h, 1))
+        #self.n_h = np.append(self.n_h, 1)
         # Get outputs
         n_o = np.dot(self.n_h, self.w_o)
 
         # 1 Activate max of outputs by storing activations of n_o in predictions array.
         #     * predictions array is used to compute confusion matrix.
         # Init predictions array to shape of output neurons
-        predictions = np.empty((np.shape(n_o)))
+        predictions = np.empty((n_o.shape))
         predictions = self.activate(n_o)
         # 2 Activate on output neurons.
         n_o = self.activate(n_o)
@@ -243,7 +248,7 @@ class mlp:
         conf = np.array(np.dot(np.transpose(target), pred))
         samples = target.shape[0]
         accuracy = np.trace(conf) / samples
-        print("  %:", round(accuracy*100, 4))
+        # print("  %:", round(accuracy*100, 4))
         return conf, accuracy
 
 def main():
@@ -253,7 +258,7 @@ def main():
     momentu = 0.9
     epochs  = 10
     inputs  = 784
-    samples = 60000/100
+    samples = 60000
 
     learnin = .1
     decay   = .5

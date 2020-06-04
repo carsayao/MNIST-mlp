@@ -1,5 +1,7 @@
+# Cupy read
+
 from mlxtend.data import loadlocal_mnist
-import numpy as np
+import cupy as np
 import os
 import sys
 FLOAT=True
@@ -19,15 +21,14 @@ CORRECT = []
 path = './MNIST/rawdata/'
 # Relative paths
 print(path)
-exit()
 train_images_raw = path + 'train-images.idx3-ubyte'
 train_labels_raw = path + 'train-labels.idx1-ubyte'
 test_images_raw  = path + 't10k-images.idx3-ubyte'
 test_labels_raw  = path + 't10k-labels.idx1-ubyte'
-train_images_dat = path + '/../memmap/train_images.dat'
-train_labels_dat = path + '/../memmap/train_labels.dat'
-test_images_dat  = path + '/../memmap/test_images.dat'
-test_labels_dat  = path + '/../memmap/test_labels.dat'
+train_images_dat = path + '/../memmap/train_images'
+train_labels_dat = path + '/../memmap/train_labels'
+test_images_dat  = path + '/../memmap/test_images'
+test_labels_dat  = path + '/../memmap/test_labels'
 
 def read_to_dat():
     # Load raw images from ubytes
@@ -57,28 +58,32 @@ def read_to_dat():
     # Normalize
     train_images = train_images / 255
     # Create memmap pointer on disk and read into .dats
-    fp0 = np.memmap(train_images_dat, dtype='float64',
-                    mode='w+', shape=(SAMPLES,INPUTS))
+    np.save(train_images_dat, train_images, True)
+    # fp0 = np.memmap(train_images_dat, dtype='float64',
+    #                 mode='w+', shape=(SAMPLES,INPUTS))
     # fp0 = np.memmap(train_images_dat, mode='w+', shape=(SAMPLES,INPUTS))
     # Copy into file pointer
-    fp0[:] = train_images[:]
-    del fp0
-    fp1 = np.memmap(train_labels_dat, dtype='float64',
-                    mode='w+', shape=(SAMPLES,NEURONS))
-    fp1[:] = train_labels[:]
-    del fp1
+    # fp0[:] = train_images[:]
+    # del fp0
+    np.save(train_labels_dat, train_labels, True)
+    # fp1 = np.memmap(train_labels_dat, dtype='float64',
+    #                 mode='w+', shape=(SAMPLES,NEURONS))
+    # fp1[:] = train_labels[:]
+    # del fp1
 
     # Same as above but with test samples
     test_images, test_labels = read_test_data()
     test_labels = convert_targets_test(test_labels)
     test_images = test_images / 255
-    fp2 = np.memmap(test_images_dat, dtype='float64',
-                    mode='w+', shape=(SAMPLES_T,INPUTS))
-    fp2[:] = test_images[:]
-    del fp2
-    fp3 = np.memmap(test_labels_dat, dtype='float64',
-                    mode='w+', shape=(SAMPLES_T,NEURONS))
-    fp3[:] = test_labels[:]
-    del fp3
+    np.save(test_images_dat, test_images, True)
+    # fp2 = np.memmap(test_images_dat, dtype='float64',
+    #                 mode='w+', shape=(SAMPLES_T,INPUTS))
+    # fp2[:] = test_images[:]
+    # del fp2
+    np.save(test_labels_dat, test_labels, True)
+    # fp3 = np.memmap(test_labels_dat, dtype='float64',
+    #                 mode='w+', shape=(SAMPLES_T,NEURONS))
+    # fp3[:] = test_labels[:]
+    # del fp3
 
 read_to_dat()
