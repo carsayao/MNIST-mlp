@@ -1,3 +1,0 @@
-numpy>=1.17.3
-mlxtend
-pylint>=2.4.3

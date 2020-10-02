@@ -19,7 +19,6 @@ CORRECT = []
 path = './MNIST/rawdata/'
 # Relative paths
 print(path)
-exit()
 train_images_raw = path + 'train-images.idx3-ubyte'
 train_labels_raw = path + 'train-labels.idx1-ubyte'
 test_images_raw  = path + 't10k-images.idx3-ubyte'
