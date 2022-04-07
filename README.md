@@ -1,5 +1,5 @@
 # MNIST-mlp
-MLP for the MNIST dataset
+MLP for the MNIST dataset. [Link to pdf writeup](https://github.com/carsayao/MNIST-mlp/blob/master/MLprogram1.pdf).
 
 ## log
 
